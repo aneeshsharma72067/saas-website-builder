@@ -10,7 +10,7 @@ export default authMiddleware({
     const searchParams = url.searchParams.toString();
     let hostName = req.headers;
     const pathWithSearchParams = `${url.pathname}${
-      searchParams.length > 0 ? `?${searchParams}` : "garbage"
+      searchParams.length > 0 ? `?${searchParams}` : ""
     }`;
 
     // if subdomain exists
