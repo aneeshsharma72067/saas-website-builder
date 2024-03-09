@@ -4,8 +4,9 @@ import { Agency } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
-import { AlertDialog } from "../ui/alert-dialog";
+import { AlertDialog, AlertDialogTrigger } from "../ui/alert-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { NumberInput } from "@tremor/react";
 import {
   Card,
   CardContent,
@@ -28,6 +29,12 @@ import * as Z from "zod";
 import FileUpload from "../global/file-upload";
 import { Input } from "../ui/input";
 import { Switch } from "../ui/switch";
+import {
+  saveActivityLogNotification,
+  updateAgencyDetails,
+} from "@/lib/queries";
+import { Button } from "../ui/button";
+import Loading from "../global/loading";
 
 type Props = {
   data?: Partial<Agency>;
@@ -252,9 +259,52 @@ const AgencyDetails = ({ data }: Props) => {
                   </FormItem>
                 )}
               />
-              {data?.id && <div className="flex flex-col gap-2"></div>}
+              {data?.id && (
+                <div className="flex flex-col gap-2">
+                  <FormLabel>Create a Goal</FormLabel>
+                  <FormDescription>
+                    ✨ Create a goal for your agency. As your business grows
+                    your goals grow too so dont forget to set the bar higher !
+                  </FormDescription>
+                  <NumberInput
+                    defaultValue={data?.goal}
+                    onValueChange={async (val: number) => {
+                      if (!data?.id) return;
+                      await updateAgencyDetails(data.id, { goal: val });
+                      await saveActivityLogNotification({
+                        agencyId: data.id,
+                        description: `Updated the agency goal to | ${val} Sub Account`,
+                        subaccountId: undefined,
+                      });
+                      router.refresh();
+                    }}
+                    min={1}
+                    className="bg-background !border !border-input"
+                    placeholder="Sub Account Goal"
+                  ></NumberInput>
+                </div>
+              )}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <Loading /> : "Save Agency Information"}
+              </Button>
             </form>
           </Form>
+          {/* {data?.id && ( */}
+          <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
+            <div>
+              <div>Danger Zone</div>
+            </div>
+            <div className="text-muted-foreground">
+              Deleting your agency cannot be undone. This will also delete all
+              sub accounts and all data related to your sub accounts. Sub
+              accounts will no longer have access to funnels, contacts etc.
+            </div>
+          </div>
+          {/* )} */}
+          <AlertDialogTrigger
+            disabled={isLoading || deletingAgency}
+            className="text-red-600"
+          ></AlertDialogTrigger>
         </CardContent>
       </Card>
     </AlertDialog>
