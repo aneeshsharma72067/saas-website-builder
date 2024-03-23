@@ -17,6 +17,9 @@ import {
 } from "../ui/alert-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { NumberInput } from "@tremor/react";
+
+import { v4 } from "uuid";
+
 import {
   Card,
   CardContent,
@@ -124,10 +127,40 @@ const AgencyDetails = ({ data }: Props) => {
       // --- Work In Progess : custId
 
       newUserData = await initUser({ role: "AGENCY_OWNER" });
-      if (!data?.customerId) {
-        // const response = await upsertAgency()
+      if (!data?.id) {
+        const response = await upsertAgency({
+          id: data?.id ? data.id : v4(),
+          address: values.address,
+          agencyLogo: values.agencyLogo,
+          city: values.city,
+          companyPhone: values.companyPhone,
+          country: values.country,
+          name: values.name,
+          state: values.state,
+          whiteLabel: values.whiteLabel,
+          zipCode: values.zipCode,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          companyEmail: values.companyEmail,
+          connectAccountId: "",
+          goal: 5,
+        });
+        toast({
+          title: "Created Agency",
+        });
+        if (data?.id) return router.refresh();
+        if (response) {
+          return router.refresh();
+        }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      toast({
+        variant: "destructive",
+        title: "Oops !",
+        description: "Could not create your agency",
+      });
+    }
   };
 
   const handleDeleteAgency = async () => {
