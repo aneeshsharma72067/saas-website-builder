@@ -128,7 +128,7 @@ const AgencyDetails = ({ data }: Props) => {
 
       newUserData = await initUser({ role: "AGENCY_OWNER" });
       if (!data?.id) {
-        const response = await upsertAgency({
+        await upsertAgency({
           id: data?.id ? data.id : v4(),
           address: values.address,
           agencyLogo: values.agencyLogo,
@@ -149,9 +149,7 @@ const AgencyDetails = ({ data }: Props) => {
           title: "Created Agency",
         });
         if (data?.id) return router.refresh();
-        if (response) {
-          return router.refresh();
-        }
+        return router.refresh();
       }
     } catch (error) {
       console.log(error);
